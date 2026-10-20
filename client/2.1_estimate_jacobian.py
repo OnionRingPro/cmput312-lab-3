@@ -12,8 +12,11 @@ def estimate_jacobian(delta_theta_1: float, delta_theta_2: float):
     init_camera_pos_u, init_camera_pos_v, _ = client.request_end_effector_pos()
     print("Initial robot position: (theta1=" + str(init_robot_angle1) + ", theta2=" + str(init_robot_angle2) + ")")
     print("Initial camera position: (u=" + str(init_camera_pos_u) + ", v=" + str(init_camera_pos_v) + ")")
+    print("Expected intermediate motor angles: (theta1=" + str(init_robot_angle1 + delta_theta_1) + ", theta2=" + str(init_robot_angle2) + ")")
 
     mv.move_to_joint_angles(init_robot_angle1 + delta_theta_1, init_robot_angle2)
+
+    print("Expeted: " + str(mv.get_computed_angles()))
 
     int_robot_angle1, int_robot_angle2 = mv.get_joint_angles()
     int_camera_pos_u, int_camera_pos_v, _ = client.request_end_effector_pos()

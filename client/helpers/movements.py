@@ -55,7 +55,6 @@ def move_to_position(x, y):
     Move the robot arm to the specified (x, y) position.
     The angles are numerical angles calculated by the inverse kinematics function.
     """
-    theta1, theta2 = (0,0)
     theta1, theta2 = inverse_kinematics(x,y)
 
     move_to_joint_angles(theta1, theta2)
