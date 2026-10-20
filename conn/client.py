@@ -29,18 +29,31 @@ class Client:
     def sendReset(self):
         self.s.send("RESET".encode("UTF-8"))
 
+    def requestForEndEffectorPosition(self):
+        self.s.send("GET_EEPOS".encode("UTF-8"))
 
-host = "192.168.0.2"
-port = 9999
-client = Client(host, port)
-i = 0
-while True:
-    print(client.pollData())
-    time.sleep(1)
-    client.sendDone()
+client = None
+
+def setup_client():
+    global client
+    host = "192.168.0.2"
+    port = 9999
+    client = Client(host, port)
+
+# while True:
+#     # The robot should receive new angle data
+#     print(client.pollData())
+#     time.sleep(1)
+#     client.sendDone()
 
 def movement_is_done():
+    assert client is not None, "Client is not set up"
     client.sendDone()
 
 def reset_jacobian():
+    assert client is not None, "Client is not set up"
     client.sendReset()
+
+def get_end_effector_pos():
+    assert client is not None, "Client is not set up"
+    client.requestForEndEffectorPosition()

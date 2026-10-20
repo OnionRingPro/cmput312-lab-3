@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 from ev3dev2.motor import OUTPUT_A, OUTPUT_B, LargeMotor, SpeedDPS, SpeedPercent
-from helpers.config import MAX_POS, MIN_POS, MOTOR1_RATIO, MOTOR2_RATIO
+from client.helpers.config import MAX_POS, MIN_POS, MOTOR1_RATIO, MOTOR2_RATIO
 import math
 import time
-from helpers.kinematics import analytical_inverse_kinematics, numerical_inverse_kinematics
+from client.helpers.kinematics import numerical_inverse_kinematics
 
 l1_motor = LargeMotor(OUTPUT_A)
 l2_motor = LargeMotor(OUTPUT_B)

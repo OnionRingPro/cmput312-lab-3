@@ -1,7 +1,7 @@
 """Kinematics helpers for the robot arm."""
 
 import math
-from helpers.config import ERROR, L1, L2, MAX_INTERATION, INITIAL_GUESS
+from client.helpers.config import ERROR, L1, L2, MAX_INTERATION, INITIAL_GUESS
 
 def forward_kinematics(theta1, theta2):
     """Return the end-effector position: numerical (x, y)."""
@@ -25,7 +25,7 @@ def forward_kinematics(theta1, theta2):
     
 def numerical_inverse_kinematics(x, y, error=ERROR, initial_guess=INITIAL_GUESS):
     """
-    Return a numerical inverse-kinematics solution in degrees. 
+    Return a numerical inverse-kinematics solution in degrees using Broyden's method. 
     Each angle is normalized to the range [-180, 180).
     """
     theta1, theta2 = initial_guess
@@ -80,31 +80,7 @@ def numerical_inverse_kinematics(x, y, error=ERROR, initial_guess=INITIAL_GUESS)
         theta1 += delta_theta1
         theta2 += delta_theta2
     raise RuntimeError("Numerical IK did not converge")
-
     
-
-def analytical_inverse_kinematics(x, y):
-    """Return an analytical inverse-kinematics solution in degrees. 
-    Each angle is normalized to the range [-180, 180).
-    """
-    # Calculate the distance from the origin to the point (x, y)
-    r = math.sqrt(x**2 + y**2)
-
-    # Check if the point is reachable
-    if r > (L1 + L2) or r < abs(L1 - L2):
-        raise ValueError("The point is unreachable.")
-
-    # Calculate the angle for theta2 using the law of cosines
-    cos_theta2 = (r**2 - L1**2 - L2**2) / (2 * L1 * L2)
-    cos_theta2 = max(-1.0, min(1.0, cos_theta2))
-    theta2 = math.degrees(math.acos(cos_theta2))
-
-    # Calculate the angle for theta1
-    k1 = L1 + L2 * cos_theta2
-    k2 = L2 * math.sin(math.radians(theta2))
-    theta1 = math.degrees(math.atan2(y, x) - math.atan2(k2, k1)) # change to + if elbow down
-
-    return _normalize_angle(theta1), _normalize_angle(theta2)
 
 def _normalize_angle(angle):
     """Normalize an angle in degrees to the range [-180, 180)."""

@@ -113,13 +113,18 @@ class Tracker:
                 cv2.circle(frame, (x, y), r, (0, 255, 0), 4)
                 cv2.rectangle(frame, (x - 5, y - 5), (x + 5, y + 5), dotColor, -1)
         
-            
-        
+tracker = None    
 
-print("Tracker Setup")
-tracker = Tracker('g', 'r')
-print("Moving on")
-while True:
-    print("Point is at: "+str(tracker.point))
-    print("Goal is at: "+str(tracker.goal))
-    time.sleep(2)
+def setup_tracker():
+    global tracker
+    print("Tracker Setup")
+    tracker = Tracker('g', 'b')
+    print("Moving on")
+
+def get_tracker_point():
+    assert tracker != None, "Tracker is not initialized"
+    return tracker.point
+
+def get_tracker_goal():
+    assert tracker != None, "Tracker is not initialized"
+    return tracker.goal

@@ -4,6 +4,7 @@
 import socket
 import time
 from queue import Queue
+from server.camera_helpers.color_tracking import setup_tracker
 
 # This class handles the Server side of the comunication between the laptop and the brick.
 class Server:
@@ -19,6 +20,8 @@ class Server:
         self.cs, addr = serversocket.accept()
         print ("Connected to: " + str(addr))
 
+        arm_is_moving = False
+
     # Sends set of angles to the brick via TCP.
     # Input: base_angle [Float]: The angle by which we want the base to move
     #        joint_angle [Float]: The angle by which we want to joint to move
@@ -28,7 +31,9 @@ class Server:
         data = str(base_angle) + "," + str(joint_angle)
         print("Sending Data: (" + data + ") to robot.")
         self.cs.send(data.encode("UTF-8"))
-        # Waiting for the client (ev3 brick) to let the server know that it is done moving
+        arm_is_moving = True
+
+    def waitForClientRequest(self, queue):
         reply = self.cs.recv(128).decode("UTF-8")
         queue.put(reply)
 
@@ -44,13 +49,31 @@ class Server:
     def sendDisableSafetyMode(self):
         self.cs.send("SAFETY_OFF".encode("UTF-8"))
 
-
-
+# Set up server
 host = "192.168.0.2"
 port = 9999
 server = Server(host, port)
 queue = Queue()
 
-while True:
-    time.sleep(10)
-    server.sendAngles(10, 10, queue)
+# Set up color tracking
+setup_tracker()
+
+def get_server():
+    return server
+
+def send_angles(theta1: float, theta2: float):
+    server.sendAngles(theta1, theta2, queue)
+
+def main():
+    # Continuously wait for a client to send a message
+    while (True):
+        print("Before: " + str(queue.qsize()))
+        server.waitForClientRequest(queue)
+        print("After: " + str(queue.qsize()))
+        if (queue.not_empty):
+            request_item = queue.get()
+            print(request_item)
+            time.sleep(1)
+
+if __name__ == "__main__":
+    main()

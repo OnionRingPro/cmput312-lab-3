@@ -1,5 +1,5 @@
 """Geometry helpers used by the robot arm measurement programs."""
-from helpers.config import MAX_POS, MIN_POS
+from client.helpers.config import MAX_POS, MIN_POS
 import math
 
 def distance_between(point1, point2):
