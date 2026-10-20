@@ -1,5 +1,5 @@
 """Geometry helpers used by the robot arm measurement programs."""
-
+from helpers.config import MAX_POS, MIN_POS
 import math
 
 def distance_between(point1, point2):
@@ -28,3 +28,8 @@ def angle_between(vertex, point1, point2):
     # Floating-point rounding can produce values just outside [-1, 1].
     cosine = max(-1.0, min(1.0, cosine))
     return math.degrees(math.acos(cosine))
+
+def is_reachable(point):
+    """Return True if the point is within the robot's reach."""
+    x, y = point
+    return MIN_POS <= x <= MAX_POS and MIN_POS <= y <= MAX_POS
