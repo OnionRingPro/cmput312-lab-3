@@ -15,9 +15,9 @@ vl = 'V Low'
 vh = 'V High'
 
 # set up for video capture on camera 0
-cap = cv.VideoCapture(1)
+# cap = cv.cv_varVideoCapture(1)
 # if using firewire camera
-# cap = cv.VideoCapture(0, cv.CAP_DC1394) # firewire camera 
+cap = cv.VideoCapture(0, cv.CAP_DC1394) # firewire camera 
 
 # create window for the slidebars
 cv.namedWindow(barsWindow, flags = cv.WINDOW_AUTOSIZE)

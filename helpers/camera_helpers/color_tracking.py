@@ -14,17 +14,17 @@ import time
 redLowMask = (0,50,50)
 redHighMask = (10, 255, 255)
 
-#If the ball is blue
-blueLowMask = (100, 150, 0)
-blueHighMask = (140, 255, 255)
+#If the ball is blue - USED
+blueLowMask = (74, 57, 63)
+blueHighMask = (134, 255, 255)
 
 #If the ball is orange
 orangeLowMask = (5, 50, 50)
 orangeHighMask = (20, 255, 255)
 
-#If the ball is green
-greenLowMask= (90, 50, 50)
-greenHighMask= (150, 255, 255)
+#If the ball is green - USED
+greenLowMask= (56, 50, 50)
+greenHighMask= (90, 255, 255)
 ########################################
 
 class Tracker:
@@ -38,9 +38,9 @@ class Tracker:
     def TrackerThread(self, pointColor, goalColor):
         print("Tracker Started")
         # Get the camera
-        vc = cv2.VideoCapture(0) # regular camera
+        # vc = cv2.VideoCapture(0) # regular camera
         # if using firewire, 
-        # vc = cv2.VideoCapture(0, cv2.CAP_DC1394)
+        vc = cv2.VideoCapture(0, cv2.CAP_DC1394)
         if vc.isOpened(): # try to get the first frame
             rval, frame = vc.read()
         else:
