@@ -38,3 +38,9 @@ while True:
     print(client.pollData())
     time.sleep(1)
     client.sendDone()
+
+def movement_is_done():
+    client.sendDone()
+
+def reset_jacobian():
+    client.sendReset()
