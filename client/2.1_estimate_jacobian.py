@@ -1,6 +1,6 @@
 #!/usr/bin/python
-import client.helpers.movements as mv
-import conn.client as client
+import helpers.movements as mv
+import client
 
 def estimate_jacobian(delta_theta_1: float, delta_theta_2: float):
     """

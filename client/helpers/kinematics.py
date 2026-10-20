@@ -1,7 +1,7 @@
 """Kinematics helpers for the robot arm."""
 
 import math
-from client.helpers.config import ERROR, L1, L2, MAX_INTERATION, INITIAL_GUESS
+from helpers.config import ERROR, L1, L2, MAX_INTERATION, INITIAL_GUESS
 
 def forward_kinematics(theta1, theta2):
     """Return the end-effector position: numerical (x, y)."""

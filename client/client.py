@@ -30,7 +30,7 @@ class Client:
         self.s.send("RESET".encode("UTF-8"))
 
     def requestForEndEffectorPosition(self):
-        self.s.send("GET_EEPOS".encode("UTF-8"))
+        self.s.send("GET_EEPOS_CAM".encode("UTF-8"))
 
 client = None
 
@@ -57,3 +57,5 @@ def reset_jacobian():
 def get_end_effector_pos():
     assert client is not None, "Client is not set up"
     client.requestForEndEffectorPosition()
+    end_effector_pos = client.pollData()
+    return end_effector_pos
