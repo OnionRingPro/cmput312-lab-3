@@ -3,10 +3,10 @@ import math
 from helpers.movements import move_on_trajectory, calibrate_zero
 
 n = 100
-r = 10
+r = 0.1
 
 cx = 0
-cy = 10
+cy = 0.1
 
 def point(t):
     x = r*math.cos(2*math.pi*t/n) + cx

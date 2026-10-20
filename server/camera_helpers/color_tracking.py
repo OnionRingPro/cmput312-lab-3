@@ -112,19 +112,20 @@ class Tracker:
                 # The circles and rectangles are drawn on the original image.
                 cv2.circle(frame, (x, y), r, (0, 255, 0), 4)
                 cv2.rectangle(frame, (x - 5, y - 5), (x + 5, y + 5), dotColor, -1)
+
+    def get_tracker_point(self):
+        return self.point
+
+    def get_tracker_goal(self):
+        return self.goal
         
-tracker = None    
+
 
 def setup_tracker():
     global tracker
     print("Tracker Setup")
+
+    # Green 
     tracker = Tracker('g', 'b')
     print("Moving on")
-
-def get_tracker_point():
-    assert tracker != None, "Tracker is not initialized"
-    return tracker.point
-
-def get_tracker_goal():
-    assert tracker != None, "Tracker is not initialized"
-    return tracker.goal
+    return tracker

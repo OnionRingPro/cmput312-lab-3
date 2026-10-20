@@ -4,7 +4,7 @@
 import socket
 import time
 from queue import Queue
-from server.camera_helpers.color_tracking import setup_tracker, get_tracker_point
+from server.camera_helpers.color_tracking import Tracker, setup_tracker
 
 # This class handles the Server side of the comunication between the laptop and the brick.
 class Server:
@@ -67,20 +67,20 @@ port = 9999
 server = Server(host, port)
 queue = Queue()
 
-# Set up color tracking
-setup_tracker()
-
 def get_server():
     return server
 
 def send_angles(theta1: float, theta2: float):
     server.sendAngles(theta1, theta2)
 
-def get_tracker_pos():
-    pos = get_tracker_point()
-    return f"TrackerPos:{pos[0]},{pos[1]},{pos[2]}"
+def get_tracker_pos(tracker: Tracker):
+    pos = tracker.get_tracker_point()
+    return f"{pos[0]},{pos[1]},{pos[2]}"
 
 def main():
+    # Set up color tracking
+    tracker = setup_tracker()
+
     # Continuously wait for a client to send a message
     while (True):
         client_still_open = server.waitForClientRequest(queue)
@@ -95,7 +95,7 @@ def main():
         elif (queue.qsize() > 0):
             request_item = queue.get()
             if (request_item == "GET_EEPOS_CAM"):
-                server.sendData(get_tracker_pos())
+                server.sendData(get_tracker_pos(tracker))
 
 if __name__ == "__main__":
     main()
