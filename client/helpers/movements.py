@@ -3,7 +3,7 @@ from ev3dev2.motor import OUTPUT_A, OUTPUT_B, LargeMotor, SpeedDPS, SpeedPercent
 from helpers.config import MAX_POS, MIN_POS, MOTOR1_RATIO, MOTOR2_RATIO
 import math
 import time
-from helpers.kinematics import numerical_inverse_kinematics, world_space_jacobian
+from helpers.kinematics import inverse_kinematics
 
 l1_motor = LargeMotor(OUTPUT_A)
 l2_motor = LargeMotor(OUTPUT_B)
@@ -21,32 +21,12 @@ def calibrate_zero():
     l2_motor_zero = l2_motor.degrees - l1_motor_current - l2_motor_current*MOTOR2_RATIO
 
 def move_to_joint_angles(theta1, theta2):
-    # assert l1_motor_zero is not None and l2_motor_zero is not None, "Motors must be calibrated before moving."
     global l1_motor_current, l2_motor_current
-    # motor1_reset = (-l1_motor_current) * MOTOR1_RATIO
-    # motor2_reset = (-l2_motor_current) * MOTOR2_RATIO
-    # motor1_target = (theta1) * MOTOR1_RATIO
-    # motor2_target = (theta2) * MOTOR2_RATIO
-    #
-    # # Reset Motor 1 In Tandem
-    # l1_motor.on_for_degrees(SpeedDPS(25), motor1_reset,  brake=False, block=False)
-    # l2_motor.on_for_degrees(SpeedDPS(25), motor1_reset, brake=False, block=True)
-    #
-    # # Reset Motor 2
-    # l2_motor.on_for_degrees(SpeedDPS(25), motor2_reset, brake=False, block=True)
-    #
-    # # Move to Target Motor 1 In Tandem
-    # l1_motor.on_for_degrees(SpeedDPS(25), motor1_target, brake=False, block=False)
-    # l2_motor.on_for_degrees(SpeedDPS(25), motor1_target, brake=False, block=True)
-    #
-    # # Move to Target Motor 2 In Tandem
-    # l2_motor.on_for_degrees(SpeedDPS(25), motor2_target, brake=False, block=True)
 
     motor1_target = (theta1 - l1_motor_current) * MOTOR1_RATIO
     motor2_target = (theta2 - l2_motor_current) * MOTOR2_RATIO
 
     l1_motor.on_for_degrees(SpeedDPS(60), motor1_target, brake=False, block=False)
-    # l2_motor.on_for_degrees(SpeedDPS(60), motor1_target, brake=False, block=True)
     l2_motor.on_for_degrees(SpeedDPS(60), motor1_target + motor2_target, brake=False, block=True)
     l1_motor.wait_while("running")
 
@@ -76,17 +56,10 @@ def move_to_position(x, y):
     The angles are numerical angles calculated by the inverse kinematics function.
     """
     theta1, theta2 = (0,0)
-    set_position()
-    theta1, theta2 = numerical_inverse_kinematics(x,y, initial_guess=(l1_motor_current, l2_motor_current))
+    theta1, theta2 = inverse_kinematics(x,y)
 
     move_to_joint_angles(theta1, theta2)
     return theta1, theta2
-
-# def move_between_points(point1, point2):
-#     """
-#     Move the robot smoothly between two points
-#     """
-#
 
 def move_on_trajectory(trajectory):
     """
