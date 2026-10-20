@@ -47,7 +47,7 @@ def line_points_from_angle(start, angle_deg, distance, step_size=0.02):
     )
     return line_points(start, end, step_size)
 
-
+        
 
 # def arc_points(points: list, step_size=0.02):
 #     if not math.isfinite(step_size) or step_size <= 0:

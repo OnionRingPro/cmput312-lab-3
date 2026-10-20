@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-from helpers.movements import move_on_trajectory, move_to_joint_angles, calibrate_zero
+from helpers.movements import move_on_trajectory, calibrate_zero
 from helpers.trajectories import line_points
 
 def main():

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import math
 from helpers.movements import move_on_trajectory, move_to_joint_angles, calibrate_zero
-from helpers.trajectories import line_points
+from helpers.trajectories import arc_points
 
 n = 100
 r = 10
