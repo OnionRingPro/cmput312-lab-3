@@ -3,7 +3,7 @@ from ev3dev2.motor import OUTPUT_A, OUTPUT_B, LargeMotor, SpeedDPS, SpeedPercent
 from helpers.config import MAX_POS, MIN_POS, MOTOR1_RATIO, MOTOR2_RATIO
 import math
 import time
-from helpers.kinematics import numerical_inverse_kinematics
+from helpers.kinematics import numerical_inverse_kinematics, world_space_jacobian
 
 l1_motor = LargeMotor(OUTPUT_A)
 l2_motor = LargeMotor(OUTPUT_B)
@@ -70,17 +70,31 @@ def get_joint_angles():
     return theta1, theta2
 
 
-def move_to_position(x, y, numeric=True):
+def move_to_position(x, y):
     """
     Move the robot arm to the specified (x, y) position.
     The angles are numerical angles calculated by the inverse kinematics function.
     """
     theta1, theta2 = (0,0)
-    if numeric:
-        set_position()
-        theta1, theta2 = numerical_inverse_kinematics(x,y, initial_guess=(l1_motor_current, l2_motor_current))
-    else:
-        theta1, theta2 = analytical_inverse_kinematics(x,y)
+    set_position()
+    theta1, theta2 = numerical_inverse_kinematics(x,y, initial_guess=(l1_motor_current, l2_motor_current))
 
     move_to_joint_angles(theta1, theta2)
     return theta1, theta2
+
+# def move_between_points(point1, point2):
+#     """
+#     Move the robot smoothly between two points
+#     """
+#
+
+def move_on_trajectory(trajectory):
+    """
+    Move the robot arm along a trajectory defined by a list of (x, y) points.
+    The angles are numerical angles calculated by the inverse kinematics function.
+    """
+    # for points in zip(trajectory[:-1], trajectory[1:]):
+    #     move_betwen_points(points[0], points[1])
+    for x, y in trajectory:
+        move_to_position(x,y)
+

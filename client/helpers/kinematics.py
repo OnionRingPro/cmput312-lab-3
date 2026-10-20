@@ -22,6 +22,12 @@ def forward_kinematics(theta1, theta2):
 #     theta1, theta2 = numerical_inverse_kinematics(x, y, error, initial_guess)
 #     theta1_analytical, theta2_analytical = analytical_inverse_kinematics(x, y)
 #     return (theta1, theta2), (theta1_analytical, theta2_analytical)
+
+def world_space_jacobian(theta1, theta2):
+        return [[-L1 * math.sin(math.radians(theta1)) - L2 * math.sin(math.radians(theta1 + theta2)),
+        -L2 * math.sin(math.radians(theta1 + theta2))],
+        [L1 * math.cos(math.radians(theta1)) + L2 * math.cos(math.radians(theta1 + theta2)),
+        L2 * math.cos(math.radians(theta1 + theta2))]]
     
 def numerical_inverse_kinematics(x, y, error=ERROR, initial_guess=INITIAL_GUESS):
     """
@@ -43,10 +49,9 @@ def numerical_inverse_kinematics(x, y, error=ERROR, initial_guess=INITIAL_GUESS)
             return _normalize_angle(theta1), _normalize_angle(theta2)
 
         # Calculate the Jacobian matrix
-        J11 = -L1 * math.sin(math.radians(theta1)) - L2 * math.sin(math.radians(theta1 + theta2))
-        J12 = -L2 * math.sin(math.radians(theta1 + theta2))
-        J21 = L1 * math.cos(math.radians(theta1)) + L2 * math.cos(math.radians(theta1 + theta2))
-        J22 = L2 * math.cos(math.radians(theta1 + theta2))
+        J1, J2 = world_space_jacobian(theta1, theta2) 
+        J11, J12 = J1
+        J21, J22 = J2
 
         # Calculate the determinant of the Jacobian
         det_J = J11 * J22 - J12 * J21
