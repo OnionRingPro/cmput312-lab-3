@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
-from helpers.movements import move_on_trajectory, calibrate_zero, move_to_position
-from helpers.trajectories import line_points
+from client.helpers.movements import move_on_trajectory, calibrate_zero, move_to_position
+from client.helpers.trajectories import line_points
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -14,9 +14,8 @@ def main():
     calibrate_zero()
 
     move_to_position(point1[0], point1[1])
-
-    #trajectory = line_points(point1, point2)
-    #move_on_trajectory(trajectory)
+    trajectory = line_points(point1, point2)
+    move_on_trajectory(trajectory)
 
 
 if __name__ == "__main__":
