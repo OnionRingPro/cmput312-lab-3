@@ -1,5 +1,4 @@
 import math 
-# spline_x = CubicSpline(point_numbers, xs, bc_type="natural")
 
 def CubicSpline(xs, ys):
     """
@@ -52,25 +51,36 @@ def CubicSpline(xs, ys):
         )
     return spline
 
+
+
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-    # Example usage of the CubicSpline function
-    n = 10
-    xs = [i * 6.28/n for i in range(n+1)]
-    ys = [math.sin(x) for x in xs]
-    spline = CubicSpline(xs, ys)
+    def plot_points(points):
+        import matplotlib.pyplot as plt
+        # Example usage of the CubicSpline function
+        n = len(points)
+        xs = [x for x,y in points]
+        ys = [y for x,y in points]
+        ts = [i/(n-1) for i in range(n)]
+        spline_x = CubicSpline(ts, xs)
+        spline_y = CubicSpline(ts, ys)
 
-    N = 100
-    x_vals = [i * 6.28/N for i in range(N)]
-    y_vals = [spline(x) for x in x_vals]
-    plt.figure()
-    plt.plot(xs, ys, 'ro', label='Control Points')
-    plt.plot(x_vals, y_vals, 'b-', label='Cubic Spline')
-    plt.legend()
-    plt.title('Cubic Spline Interpolation')
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.grid()
-    plt.show()
+        N = 50
+        t_vals = [i/N for i in range(N)]
+        
+        print(max(ts))
+        print(max(t_vals))
+        x_vals = [spline_x(t) for t in t_vals] 
+        y_vals = [spline_y(t) for t in t_vals] 
+        plt.figure()
+        plt.plot(xs, ys, 'ro', label='Control Points')
+        plt.plot(x_vals, y_vals, 'b-', label='Cubic Spline')
+        plt.legend()
+        plt.title('Cubic Spline Interpolation')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.grid()
+        plt.show()
 
+    points = [(15/100, 10/100), (10/100, 18/100), (-10/100, 15/100), (-15/100, 10/100)]
+    plot_points(points)
 

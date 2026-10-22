@@ -1,7 +1,7 @@
 """Generate Cartesian waypoints without accessing the robot motors."""
 
 import math
-import helpers.math_tools
+from helpers.math_tools import CubicSpline
 # from scipy.interpolate import CubicSpline
 
 
