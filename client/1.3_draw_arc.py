@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import math
-from client.helpers.kinematics import inverse_kinematics
-from client.helpers.movements import move_on_trajectory, calibrate_zero, move_to_position
-from client.helpers.trajectories import arc_points
+from helpers.kinematics import inverse_kinematics
+from helpers.movements import move_on_trajectory, calibrate_zero, move_to_position
+from helpers.trajectories import arc_points
 
 # n = 100
 # r = 0.1
