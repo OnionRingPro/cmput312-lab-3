@@ -1,7 +1,8 @@
 """Generate Cartesian waypoints without accessing the robot motors."""
 
 import math
-from scipy.interpolate import CubicSpline
+import math_tools
+# from scipy.interpolate import CubicSpline
 
 
 def line_points(start, end, step_size=0.01):
@@ -72,8 +73,12 @@ def arc_points(points: list, step_size=0.005):
     xs = [point[0] for point in points]
     ys = [point[1] for point in points]
 
-    spline_x = CubicSpline(point_numbers, xs, bc_type="natural")
-    spline_y = CubicSpline(point_numbers, ys, bc_type="natural")
+    # With scipy
+    # spline_x = CubicSpline(point_numbers, xs, bc_type="natural")
+    # spline_y = CubicSpline(point_numbers, ys, bc_type="natural")
+
+    spline_x = CubicSpline(point_numbers, xs)
+    spline_y = CubicSpline(point_numbers, ys)
 
     results = [points[0]]
     for i in range(len(points) - 1):
