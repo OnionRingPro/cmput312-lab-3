@@ -40,3 +40,60 @@ def _normalize_angle(angle):
     """Normalize an angle in degrees to the range [-180, 180)."""
     return (angle + 180.0) % 360.0 - 180.0
 
+def numerical_inverse_kinematics(x, y, error=ERROR, initial_guess=INITIAL_GUESS):
+    """
+    Return a numerical inverse-kinematics solution in degrees. 
+    Each angle is normalized to the range [-180, 180).
+    """
+    theta1, theta2 = initial_guess
+
+    for _ in range(MAX_INTERATION):
+        # Calculate the current end-effector position
+        current_x, current_y = forward_kinematics(theta1, theta2)
+
+        # Calculate the error in position
+        error_x = x - current_x
+        error_y = y - current_y
+
+        # Check if the error is within the acceptable range
+        if math.hypot(error_x, error_y) < error:
+            return _normalize_angle(theta1), _normalize_angle(theta2)
+
+        # Calculate the Jacobian matrix
+        J11 = -L1 * math.sin(math.radians(theta1)) - L2 * math.sin(math.radians(theta1 + theta2))
+        J12 = -L2 * math.sin(math.radians(theta1 + theta2))
+        J21 = L1 * math.cos(math.radians(theta1)) + L2 * math.cos(math.radians(theta1 + theta2))
+        J22 = L2 * math.cos(math.radians(theta1 + theta2))
+
+        # Calculate the determinant of the Jacobian
+        det_J = J11 * J22 - J12 * J21
+
+        if abs(det_J) < 1e-8:
+            # Move slightly away from a singular configuration before applying
+            # the inverse-Jacobian update.
+            theta2 += 1.0
+            continue
+
+        # Calculate the inverse of the Jacobian matrix
+        inv_J11 = J22 / det_J
+        inv_J12 = -J12 / det_J
+        inv_J21 = -J21 / det_J
+        inv_J22 = J11 / det_J
+
+        # Update joint angles using the inverse Jacobian and position errors
+        delta_theta1 = math.degrees(inv_J11 * error_x + inv_J12 * error_y)
+        delta_theta2 = math.degrees(inv_J21 * error_x + inv_J22 * error_y)
+
+        # Close to a singularity the inverse Jacobian can produce an enormous
+        # Newton step.  Scale both joint updates together so the direction is
+        # preserved while keeping the iteration stable.
+        max_step = 15.0
+        largest_step = max(abs(delta_theta1), abs(delta_theta2))
+        if largest_step > max_step:
+            scale = max_step / largest_step
+            delta_theta1 *= scale
+            delta_theta2 *= scale
+
+        theta1 += delta_theta1
+        theta2 += delta_theta2
+    raise RuntimeError("Numerical IK did not converge")

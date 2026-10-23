@@ -38,9 +38,9 @@ class Tracker:
     def TrackerThread(self, pointColor, goalColor):
         print("Tracker Started")
         # Get the camera
-        # vc = cv2.VideoCapture(0) # regular camera
+        vc = cv2.VideoCapture(0) # regular camera
         # if using firewire, 
-        vc = cv2.VideoCapture(0, cv2.CAP_DC1394)
+        # vc = cv2.VideoCapture(0, cv2.CAP_DC1394)
         if vc.isOpened(): # try to get the first frame
             rval, frame = vc.read()
         else:
@@ -54,7 +54,7 @@ class Tracker:
             self.DrawCircles(frame, circlesGoal, (0, 0, 255))
 
             if circlesPoint is not None:
-                self.point = circlesPoint[0]
+                self.point = circlesPoint[0, 0]
             
             if circlesGoal is not None:
                 self.goal = circlesGoal[0]

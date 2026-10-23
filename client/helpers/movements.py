@@ -3,7 +3,7 @@ from ev3dev2.motor import OUTPUT_A, OUTPUT_B, LargeMotor, SpeedDPS, SpeedPercent
 from helpers.config import MAX_POS, MIN_POS, MOTOR1_RATIO, MOTOR2_RATIO
 import math
 import time
-from helpers.kinematics import inverse_kinematics
+from helpers.kinematics import numerical_inverse_kinematics
 
 l1_motor = LargeMotor(OUTPUT_A)
 l2_motor = LargeMotor(OUTPUT_B)
@@ -55,7 +55,7 @@ def move_to_position(x, y):
     Move the robot arm to the specified (x, y) position.
     The angles are numerical angles calculated by the inverse kinematics function.
     """
-    theta1, theta2 = inverse_kinematics(x,y)
+    theta1, theta2 = numerical_inverse_kinematics(x,y)
 
     move_to_joint_angles(theta1, theta2)
     return theta1, theta2

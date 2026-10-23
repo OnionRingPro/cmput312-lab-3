@@ -32,6 +32,13 @@ class Client:
     def sendCommand(self, command: str):
         self.s.send(command.encode("UTF-8"))
 
+    def request_end_effector_pos(self):
+        # pos[0]=x, pos[1]=y, pos[2]=circle radius
+        self.sendCommand(command="GET_EEPOS_CAM")
+        end_effector_pos_str = self.pollData()
+        end_effector_pos = (float(s) for s in end_effector_pos_str.split(","))
+        return end_effector_pos
+
 client = None
 
 def setup_client():
@@ -39,6 +46,7 @@ def setup_client():
     host = "192.168.0.2"
     port = 9999
     client = Client(host, port)
+    return client
 
 # while True:
 #     # The robot should receive new angle data
@@ -46,6 +54,7 @@ def setup_client():
 #     time.sleep(1)
 #     client.sendDone()
 
+# Left for backwards compat but please use class methods instead
 def movement_is_done():
     assert client is not None, "Client is not set up"
     client.sendDone()
@@ -55,9 +64,5 @@ def reset_jacobian():
     client.sendReset()
 
 def request_end_effector_pos():
-    # pos[0]=x, pos[1]=y, pos[2]=circle radius
     assert client is not None, "Client is not set up"
-    client.sendCommand(command="GET_EEPOS_CAM")
-    end_effector_pos_str = client.pollData()
-    end_effector_pos = (float(s) for s in end_effector_pos_str.split(","))
-    return end_effector_pos
+    client.request_end_effector_pos()
