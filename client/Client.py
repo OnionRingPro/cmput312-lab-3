@@ -4,6 +4,7 @@
 import socket
 import os
 import time
+import math
 
 # This class handles the client side of communication. It has a set of predefined messages to send to the server as well as functionality to poll and decode data.
 class Client:
@@ -38,6 +39,25 @@ class Client:
         end_effector_pos_str = self.pollData()
         end_effector_pos = (float(s) for s in end_effector_pos_str.split(","))
         return end_effector_pos
+
+    def request_positions(self):
+        """Return ((ee_u, ee_v), (target_u, target_v)), or None if invalid."""
+        self.sendCommand("GET_POSITIONS_CAM")
+        # A TCP reply can arrive in several pieces; read through its newline.
+        data = b""
+        while not data.endswith(b"\n"):
+            chunk = self.s.recv(128)
+            if not chunk:
+                raise ConnectionError("Camera server disconnected.")
+            data += chunk
+        reply = data.decode("UTF-8").strip()
+        if reply == "NONE":
+            return None
+        values = tuple(float(value) for value in reply.split(","))
+        if (len(values) != 6 or not all(math.isfinite(value) for value in values)
+                or values[2] <= 0 or values[5] <= 0):
+            return None
+        return values[:2], values[3:5]
 
 client = None
 

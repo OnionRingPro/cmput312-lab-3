@@ -32,6 +32,7 @@ class Tracker:
     def __init__(self, pointColor, goalColor):
         self.point = (0,0,0)
         self.goal = (0,0,0)
+        self.positions = None
         thread = threading.Thread(target=self.TrackerThread, args=(pointColor, goalColor), daemon=True)
         thread.start()
 
@@ -48,6 +49,8 @@ class Tracker:
         while rval:
             # Handle current frame
             rval, frame = vc.read()
+            if not rval:
+                break
             circlesPoint = self.GetLocation(frame, pointColor)
             circlesGoal = self.GetLocation(frame, goalColor)
             self.DrawCircles(frame, circlesPoint, (255, 0, 0))
@@ -57,7 +60,13 @@ class Tracker:
                 self.point = circlesPoint[0, 0]
             
             if circlesGoal is not None:
-                self.goal = circlesGoal[0]
+                self.goal = circlesGoal[0, 0]
+
+            # Publish both markers from the same frame, or mark it invalid.
+            if circlesPoint is not None and circlesGoal is not None:
+                self.positions = (tuple(self.point), tuple(self.goal), time.monotonic())
+            else:
+                self.positions = None
 
             # Shows the original image with the detected circles drawn.
             cv2.imshow("Result", frame)
@@ -67,6 +76,7 @@ class Tracker:
             if key == 27:
                 break
         
+        self.positions = None
         vc.release()
         cv2.destroyAllWindows()
         print("Tracker Ended")
@@ -118,6 +128,13 @@ class Tracker:
 
     def get_tracker_goal(self):
         return self.goal
+
+    def get_tracker_positions(self):
+        """Return both markers, or None if missing or over one second old."""
+        positions = self.positions
+        if positions is None or time.monotonic() - positions[2] > 1.0:
+            return None
+        return positions[:2]
         
 
 

@@ -127,3 +127,27 @@ def estimate_jacobian(client, delta_theta_1: float, delta_theta_2: float):
                 [delta_v_1 / measured_delta_theta1_1, delta_v_2 / measured_delta_theta2_2]]
     print("Estimated Jacobian: " + str(jacobian))
     return jacobian
+
+
+def Broyden(J, delta_y, delta_q, step_size=0.01):
+    """
+        Broyden's method for updating the Jacobian matrix
+        Used for part 2 of the lab
+        Input:
+            J: current Jacobian matrix
+            delta_y: observed image-space displacement
+            delta_q: change in joint angles
+            step_size: step size for the update
+        Return: J_(k+1)
+    """
+    denominator  = delta_q[0]**2 + delta_q[1]**2
+    if denominator == 0:
+        raise ValueError("delta_q cannot be zero vector for Broyden's update.")
+    J_kq_k = [J[0][0] * delta_q[0] + J[0][1] * delta_q[1], J[1][0] * delta_q[0] + J[1][1] * delta_q[1]]
+    temp = [delta_y[0] - J_kq_k[0], delta_y[1] - J_kq_k[1]]
+    numeriter = [[temp[0] * delta_q[0], temp[0] * delta_q[1]], [temp[1] * delta_q[0], temp[1] * delta_q[1]]]
+    new_J = [[],[]]
+    for i in range(2):
+        for j in range(2):
+            new_J[i].append(J[i][j] + step_size * numeriter[i][j] / denominator)
+    return new_J
