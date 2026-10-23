@@ -111,7 +111,7 @@ def estimate_jacobian(client, delta_theta_1: float, delta_theta_2: float):
     delta_u_1 = int_camera_pos_u - init_camera_pos_u
     delta_v_1 = int_camera_pos_v - init_camera_pos_v
 
-    mv.move_to_joint_angles(init_robot_angle1, init_robot_angle2 + delta_theta_2)
+    mv.move_to_joint_angles(int_robot_angle1, int_robot_angle2 + delta_theta_2)
 
     final_robot_angle1, final_robot_angle2 = mv.get_joint_angles()
     final_camera_pos_u, final_camera_pos_v, _ = client.request_end_effector_pos()
@@ -122,3 +122,8 @@ def estimate_jacobian(client, delta_theta_1: float, delta_theta_2: float):
     measured_delta_theta2_2 = final_robot_angle2 - int_robot_angle2
     delta_u_2 = final_camera_pos_u - int_camera_pos_u
     delta_v_2 = final_camera_pos_v - int_camera_pos_v
+
+    jacobian = [[delta_u_1 / measured_delta_theta1_1, delta_u_2 / measured_delta_theta2_2],
+                [delta_v_1 / measured_delta_theta1_1, delta_v_2 / measured_delta_theta2_2]]
+    print("Estimated Jacobian: " + str(jacobian))
+    return jacobian
