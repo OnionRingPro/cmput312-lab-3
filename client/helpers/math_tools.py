@@ -1,5 +1,6 @@
 import math 
 import helpers.movements as mv
+import matplotlib.pyplot as plt
 
 def CubicSpline(xs, ys):
     """
@@ -30,7 +31,7 @@ def CubicSpline(xs, ys):
 
     def spline(x):
         if x < xs[0] or x > xs[-1]:
-            raise ValueError("x is out of bounds for the spline interpolation.")
+            raise ValueError("x is outerode of bounds for the spline interpolation.")
 
         # Find the right interval for x
         idx = 0
@@ -56,7 +57,6 @@ def CubicSpline(xs, ys):
 
 if __name__ == "__main__":
     def plot_points(points):
-        import matplotlib.pyplot as plt
         # Example usage of the CubicSpline function
         n = len(points)
         xs = [x for x,y in points]

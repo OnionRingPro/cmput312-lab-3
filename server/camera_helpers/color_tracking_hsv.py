@@ -61,6 +61,10 @@ while(True):
     mask = cv.inRange(hsv, HSVLOW, HSVHIGH)
     maskedFrame = cv.bitwise_and(frame, frame, mask = mask)
 
+    #erode and dilate
+    maskedFrame = cv.erode(maskedFrame, np.ones((5, 5),np.uint8), iterations=1)
+    maskedFrame = cv.dilate(maskedFrame, np.ones((5, 5),np.uint8), iterations=5)
+
     # display the camera and masked images
     cv.imshow('Masked', maskedFrame)
     cv.imshow('Camera', frame)

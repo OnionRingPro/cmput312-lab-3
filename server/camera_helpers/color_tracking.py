@@ -15,16 +15,16 @@ redLowMask = (0,50,50)
 redHighMask = (10, 255, 255)
 
 #If the ball is blue - USED
-blueLowMask = (74, 57, 63)
-blueHighMask = (134, 255, 255)
+blueLowMask = (87, 62, 139)
+blueHighMask = (91, 255, 255)
 
 #If the ball is orange
 orangeLowMask = (5, 50, 50)
 orangeHighMask = (20, 255, 255)
 
 #If the ball is green - USED
-greenLowMask= (56, 50, 50)
-greenHighMask= (90, 255, 255)
+greenLowMask= (71, 62, 139)
+greenHighMask= (81, 255, 255)
 ########################################
 
 class Tracker:
@@ -89,8 +89,8 @@ class Tracker:
             # Green Tracking
             mask = cv2.inRange(hsv, greenLowMask, greenHighMask)
         # Perform erosion and dilation in the image (in 11x11 pixels squares) in order to reduce the "blips" on the mask
-        mask = cv2.erode(mask, np.ones((11, 11),np.uint8), iterations=2)
-        mask = cv2.dilate(mask, np.ones((11, 11),np.uint8), iterations=5)
+        mask = cv2.erode(mask, np.ones((5, 5),np.uint8), iterations=1)
+        mask = cv2.dilate(mask, np.ones((5, 5),np.uint8), iterations=5)
         # Mask the blurred image so that we only consider the areas with the desired colour
         masked_blurred = cv2.bitwise_and(blurred,blurred, mask= mask)
         # masked_blurred = cv2.bitwise_and(frame,frame, mask= mask)
@@ -125,7 +125,7 @@ def setup_tracker():
     global tracker
     print("Tracker Setup")
 
-    # Green 
+    # Green is the end effector, blue is the goal
     tracker = Tracker('g', 'b')
     print("Moving on")
     return tracker
