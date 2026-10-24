@@ -32,7 +32,7 @@ class Server:
 
     def sendData(self, data: str):
         print("Sending Data: (" + data + ") to robot.")
-        self.cs.send(data.encode("UTF-8"))
+        self.cs.sendall(data.encode("UTF-8"))
 
     def waitForClientRequest(self, queue):
         reply = self.cs.recv(128).decode("UTF-8")
@@ -96,6 +96,13 @@ def main():
             request_item = queue.get()
             if (request_item == "GET_EEPOS_CAM"):
                 server.sendData(get_tracker_pos(tracker))
+            elif request_item == "GET_POSITIONS_CAM":
+                positions = tracker.get_tracker_positions()
+                if positions is None:
+                    server.sendData("NONE\n")
+                else:
+                    point, goal = positions
+                    server.sendData(",".join(str(value) for value in (*point, *goal)) + "\n")
 
 if __name__ == "__main__":
     main()
