@@ -91,45 +91,51 @@ def estimate_jacobian(client, delta_theta_1: float, delta_theta_2: float):
         Both angle measurements are in degrees
         Used for part 2 of the lab
     """
-    init_robot_angle1, init_robot_angle2 = mv.get_joint_angles()
-    init_camera_pos_u, init_camera_pos_v, _ = client.request_end_effector_pos()
-    print("Initial robot position: (theta1=" + str(init_robot_angle1) + ", theta2=" + str(init_robot_angle2) + ")")
-    print("Initial camera position: (u=" + str(init_camera_pos_u) + ", v=" + str(init_camera_pos_v) + ")")
-    print("Expected intermediate motor angles: (theta1=" + str(init_robot_angle1 + delta_theta_1) + ", theta2=" + str(init_robot_angle2) + ")")
+    # Angles returned by the movement helper are in degrees.
+    theta1_0, theta2_0 = mv.get_joint_angles()
+    u0, v0, _ = client.request_end_effector_pos()
 
-    mv.move_joint_1(init_robot_angle1 + delta_theta_1)
+    # Probe joint 1 and record the actual resulting pose.
+    mv.move_joint_1(theta1_0 + delta_theta_1)
+    theta1_1, theta2_1 = mv.get_joint_angles()
+    u1, v1, _ = client.request_end_effector_pos()
+    mv.move_joint_1(theta1_0)
 
-    print("Expeted: " + str(mv.get_computed_angles()))
+    # Probe joint 2 from the original pose and record its actual result.
+    mv.move_joint_2(theta2_0 + delta_theta_2)
+    theta1_2, theta2_2 = mv.get_joint_angles()
+    u2, v2, _ = client.request_end_effector_pos()
+    mv.move_joint_2(theta2_0)
 
-    int_robot_angle1, int_robot_angle2 = mv.get_joint_angles()
-    int_camera_pos_u, int_camera_pos_v, _ = client.request_end_effector_pos()
-    print("Intermediate robot position: (theta1=" + str(int_robot_angle1) + ", theta2=" + str(int_robot_angle2) + ")")
-    print("Intermediate camera position: (u=" + str(int_camera_pos_u) + ", v=" + str(int_camera_pos_v) + ")")
+    # Joint-change matrix D, with each probe as a column, in radians.
+    dtheta11 = math.radians(theta1_1 - theta1_0)
+    dtheta21 = math.radians(theta2_1 - theta2_0)
+    dtheta12 = math.radians(theta1_2 - theta1_0)
+    dtheta22 = math.radians(theta2_2 - theta2_0)
 
-    mv.move_joint_1(init_robot_angle1)
+    determinant = dtheta11 * dtheta22 - dtheta12 * dtheta21
+    if abs(determinant) < 1e-8:
+        raise ValueError(
+            "Jacobian probes produced nearly dependent joint changes; "
+            "choose different probe motions."
+        )
 
-    measured_delta_theta1 = int_robot_angle1 - init_robot_angle1
-    delta_u_1 = int_camera_pos_u - init_camera_pos_u
-    delta_v_1 = int_camera_pos_v - init_camera_pos_v
-
-    mv.move_joint_2(init_robot_angle2 + delta_theta_2)
-
-    final_robot_angle1, final_robot_angle2 = mv.get_joint_angles()
-    final_camera_pos_u, final_camera_pos_v, _ = client.request_end_effector_pos()
-    print("Final robot position: (theta1=" + str(final_robot_angle1) + ", theta2=" + str(final_robot_angle2) + ")")
-    print("Final camera position: (u=" + str(final_camera_pos_u) + ", v=" + str(final_camera_pos_v) + ")")
-
-    mv.move_joint_2(init_robot_angle2)
-
-    measured_delta_theta2 = final_robot_angle2 - init_robot_angle2
-    delta_u_2 = final_camera_pos_u - init_camera_pos_u
-    delta_v_2 = final_camera_pos_v - init_camera_pos_v
+    # J = Y * inverse(D), where Y contains image displacement columns.
+    du1, dv1 = u1 - u0, v1 - v0
+    du2, dv2 = u2 - u0, v2 - v0
 
     jacobian = [
-        [delta_u_1 / (measured_delta_theta1 * math.pi / 180), delta_u_2 / (measured_delta_theta2 * math.pi / 180)],
-        [delta_v_1 / (measured_delta_theta1 * math.pi / 180), delta_v_2 / (measured_delta_theta2 * math.pi / 180)]
+        [
+            (du1 * dtheta22 - du2 * dtheta21) / determinant,
+            (-du1 * dtheta12 + du2 * dtheta11) / determinant,
+        ],
+        [
+            (dv1 * dtheta22 - dv2 * dtheta21) / determinant,
+            (-dv1 * dtheta12 + dv2 * dtheta11) / determinant,
+        ],
     ]
-    print("Estimated Jacobian: " + str(jacobian))
+
+    print("Estimated Jacobian:", jacobian)
     return jacobian
 
 

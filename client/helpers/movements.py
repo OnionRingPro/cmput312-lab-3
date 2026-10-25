@@ -32,7 +32,7 @@ def move_joint_2(theta2):
     motor2_target = (theta2 - l2_motor_current) * MOTOR2_RATIO
     l2_motor.on_for_degrees(SpeedDPS(60), motor2_target, brake=False, block=False)
     l2_motor.wait_while("running")
-    l2_motor_current += motor2_target / MOTOR1_RATIO
+    l2_motor_current += motor2_target / MOTOR2_RATIO
 
 def move_to_joint_angles(theta1, theta2, blocking=True):
     global l1_motor_current, l2_motor_current
