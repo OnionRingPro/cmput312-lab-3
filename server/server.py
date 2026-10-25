@@ -35,13 +35,16 @@ class Server:
         self.cs.sendall(data.encode("UTF-8"))
 
     def waitForClientRequest(self, queue):
-        reply = self.cs.recv(128).decode("UTF-8")
-        if not reply:
-            print("Closing client...")
-            self.cs.close()
-            print("Client closed")
-            return False
-        queue.put(reply)
+        while b"\n" not in self.request_buffer:
+            chunk = self.cs.recv(128)
+            if not chunk:
+                print("Closing client...")
+                self.cs.close()
+                print("Client closed")
+                return False
+            self.request_buffer += chunk
+        reply, self.request_buffer = self.request_buffer.split(b"\n", 1)
+        queue.put(reply.decode("UTF-8"))
         return True
 
     # Sends a termination message to the client. This will cause the client to exit "cleanly", after stopping the motors.
@@ -58,6 +61,7 @@ class Server:
 
     def wait_for_new_conn(self):
         self.cs, addr = self.serversocket.accept()
+        self.request_buffer = b""
         print ("Connected to: " + str(addr))
         self.arm_is_moving = False
 
@@ -97,7 +101,14 @@ def main():
             if (request_item == "GET_EEPOS_CAM"):
                 server.sendData(get_tracker_pos(tracker))
             elif request_item == "GET_POSITIONS_CAM":
-                positions = tracker.get_tracker_positions()
+                # Use a frame whose capture started after this request,
+                # rather than an older frame still being processed.
+                requested_at = time.monotonic()
+                deadline = requested_at + 2.0
+                positions = tracker.get_tracker_positions(after=requested_at)
+                while positions is None and time.monotonic() < deadline:
+                    time.sleep(0.01)
+                    positions = tracker.get_tracker_positions(after=requested_at)
                 if positions is None:
                     server.sendData("NONE\n")
                 else:

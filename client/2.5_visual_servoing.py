@@ -4,10 +4,11 @@ import helpers.movements as mv
 from helpers.math_tools import estimate_jacobian, Broyden
 import math
 import time
+import argparse
 
 ERROR = 5.0  # pixels
 CONTROL_GAIN = 0.05 # controls how large a step to take in the direction of the target
-MAX_STEP = 0.5 # maximum joint change per iteration, in radians
+MAX_STEP = math.radians(3.0) # maximum joint change per iteration, in radians
 MAX_ITERATIONS = 100
 
 
@@ -33,22 +34,26 @@ def update_jacobian(J, previous_angles, current_angles,
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--track", action="store_true", help="Keep following a moving target until Ctrl+C.")
+    args = parser.parse_args()
     client = setup_client()
     try:
         mv.calibrate_zero()
         read_positions(client)  # Wait until the camera can see both markers.
-        run_servoing(client)
+        run_servoing(client, continuous=args.track)
     finally:
         mv.l1_motor.off(brake=True)
         mv.l2_motor.off(brake=True)
         client.s.close()
 
 
-def run_servoing(client):
+def run_servoing(client, continuous=False):
     jacobian = estimate_jacobian(client, 10, 10)
     end_effector_pos, target_pos = read_positions(client)
 
-    for iteration in range(MAX_ITERATIONS + 1):
+    iteration = 0
+    while continuous or iteration <= MAX_ITERATIONS:
         error = [target_pos[i] - end_effector_pos[i] for i in range(2)]
         distance = math.hypot(*error)
         previous_angles = mv.get_joint_angles()
@@ -57,9 +62,13 @@ def run_servoing(client):
               "Joint angles: ", previous_angles
               )
         if distance <= ERROR:
-            print("Target reached.")
-            return True
-        if iteration == MAX_ITERATIONS:
+            if not continuous:
+                print("Target reached.")
+                return True
+            time.sleep(0.1)
+            end_effector_pos, target_pos = read_positions(client)
+            continue
+        if not continuous and iteration == MAX_ITERATIONS:
             print("Iteration limit reached; target was not reached.")
             return False
 
@@ -88,6 +97,7 @@ def run_servoing(client):
         current_angles_rad = [a * math.pi / 180 for a in current_angles]
         jacobian = update_jacobian(jacobian, previous_angles_rad, current_angles_rad,
                                    previous_position, end_effector_pos)
+        iteration += 1
 
 
 if __name__ == "__main__":

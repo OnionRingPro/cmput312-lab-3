@@ -72,6 +72,7 @@ class Tracker:
 
         while rval:
             # Handle current frame
+            frame_started_at = time.monotonic()
             rval, original_frame = vc.read()
             if not rval:
                 break
@@ -90,7 +91,7 @@ class Tracker:
 
             # Publish both markers from the same frame, or mark it invalid.
             if circlesPoint is not None and circlesGoal is not None:
-                self.positions = (tuple(self.point), tuple(self.goal), time.monotonic())
+                self.positions = (tuple(self.point), tuple(self.goal), frame_started_at)
             else:
                 self.positions = None
 
@@ -186,10 +187,11 @@ class Tracker:
     def get_tracker_goal(self):
         return self.goal
 
-    def get_tracker_positions(self):
-        """Return both markers, or None if missing or over one second old."""
+    def get_tracker_positions(self, after=None):
+        """Return valid markers captured after the cutoff and under one second old."""
         positions = self.positions
-        if positions is None or time.monotonic() - positions[2] > 1.0:
+        if (positions is None or time.monotonic() - positions[2] > 1.0
+                or (after is not None and positions[2] <= after)):
             return None
         return positions[:2]
         

@@ -24,24 +24,30 @@ class Client:
     
     # Sends a message to the server letting it know that the movement of the motors was executed without any inconvenience.
     def sendDone(self):
-        self.s.send("DONE".encode("UTF-8"))
+        self.sendCommand("DONE")
 
     # Sends a message to the server letting it know that there was an isse during the execution of the movement (obstacle avoided) and that the initial jacobian should be recomputed (Visual servoing started from scratch)
     def sendReset(self):
-        self.s.send("RESET".encode("UTF-8"))
+        self.sendCommand("RESET")
 
     def sendCommand(self, command: str):
-        self.s.send(command.encode("UTF-8"))
+        self.s.sendall((command + "\n").encode("UTF-8"))
 
     def request_end_effector_pos(self):
-        # pos[0]=x, pos[1]=y, pos[2]=circle radius
-        self.sendCommand(command="GET_EEPOS_CAM")
-        end_effector_pos_str = self.pollData()
-        end_effector_pos = (float(s) for s in end_effector_pos_str.split(","))
-        return end_effector_pos
+        # Use the same fresh, validated, newline-delimited reply as servoing.
+        values = self._request_positions()
+        while values is None:
+            print("Waiting for both markers...")
+            time.sleep(0.1)
+            values = self._request_positions()
+        return values[:3]
 
     def request_positions(self):
         """Return ((ee_u, ee_v), (target_u, target_v)), or None if invalid."""
+        values = self._request_positions()
+        return None if values is None else (values[:2], values[3:5])
+
+    def _request_positions(self):
         self.sendCommand("GET_POSITIONS_CAM")
         # A TCP reply can arrive in several pieces; read through its newline.
         data = b""
@@ -57,7 +63,7 @@ class Client:
         if (len(values) != 6 or not all(math.isfinite(value) for value in values)
                 or values[2] <= 0 or values[5] <= 0):
             return None
-        return values[:2], values[3:5]
+        return values
 
 client = None
 
