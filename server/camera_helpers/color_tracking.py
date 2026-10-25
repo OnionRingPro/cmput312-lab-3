@@ -14,7 +14,7 @@ import time
 redLowMask = (0,50,50)
 redHighMask = (10, 255, 255)
 
-#If the ball is blue - USED
+#If the ball is blue
 blueLowMask = (87, 62, 139)
 blueHighMask = (91, 255, 255)
 
@@ -22,9 +22,13 @@ blueHighMask = (91, 255, 255)
 orangeLowMask = (5, 50, 50)
 orangeHighMask = (20, 255, 255)
 
-#If the ball is green - USED
-greenLowMask= (71, 62, 139)
-greenHighMask= (81, 255, 255)
+#If the ball is yellow
+yellowLowMask = (30, 44, 179)
+yellowHighMask = (35, 255, 255)
+
+#If the ball is green
+greenLowMask= (65, 62, 139)
+greenHighMask= (73, 255, 255)
 ########################################
 
 class Tracker:
@@ -33,6 +37,7 @@ class Tracker:
         self.point = (0,0,0)
         self.goal = (0,0,0)
         self.positions = None
+        print("Starting tracker thread")
         thread = threading.Thread(target=self.TrackerThread, args=(pointColor, goalColor), daemon=True)
         thread.start()
 
@@ -43,14 +48,35 @@ class Tracker:
         # if using firewire, 
         # vc = cv2.VideoCapture(0, cv2.CAP_DC1394)
         if vc.isOpened(): # try to get the first frame
-            rval, frame = vc.read()
+            rval, original_frame = vc.read()
         else:
             rval = False
+
+        if pointColor == 'g':
+            p_hul, p_sal, p_val = greenLowMask
+            p_huh, p_sah, p_vah = greenHighMask
+            p_color_mask = (0, 255, 0)
+        elif pointColor == 'y':
+            p_hul, p_sal, p_val = yellowLowMask
+            p_huh, p_sah, p_vah = yellowHighMask
+            p_color_mask = (0, 255, 255)
+        
+        if goalColor == 'g':
+            g_hul, g_sal, g_val = greenLowMask
+            g_huh, g_sah, g_vah = greenHighMask
+            g_color_mask = (0, 255, 0)
+        elif goalColor == 'y':
+            g_hul, g_sal, g_val = yellowLowMask
+            g_huh, g_sah, g_vah = yellowHighMask
+            g_color_mask = (0, 255, 255)
+
         while rval:
             # Handle current frame
-            rval, frame = vc.read()
+            rval, original_frame = vc.read()
             if not rval:
                 break
+
+            frame = original_frame
             circlesPoint = self.GetLocation(frame, pointColor)
             circlesGoal = self.GetLocation(frame, goalColor)
             self.DrawCircles(frame, circlesPoint, (255, 0, 0))
@@ -70,6 +96,33 @@ class Tracker:
 
             # Shows the original image with the detected circles drawn.
             cv2.imshow("Result", frame)
+
+            # Mask window:
+
+            # make array for final values
+            P_HSVLOW = np.array([p_hul, p_sal, p_val])
+            P_HSVHIGH = np.array([p_huh, p_sah, p_vah])
+            G_HSVLOW = np.array([g_hul, g_sal, g_val])
+            G_HSVHIGH = np.array([g_huh, g_sah, g_vah])
+            hsv = cv2.cvtColor(original_frame, cv2.COLOR_BGR2HSV)
+
+            kernel = np.ones((5, 5), np.uint8)
+
+            pmask = cv2.inRange(hsv, P_HSVLOW, P_HSVHIGH)
+            pmask = cv2.erode(pmask, kernel, iterations=1)
+            pmask = cv2.dilate(pmask, kernel, iterations=5)
+
+            gmask = cv2.inRange(hsv, G_HSVLOW, G_HSVHIGH)
+            gmask = cv2.erode(gmask, kernel, iterations=1)
+            gmask = cv2.dilate(gmask, kernel, iterations=5)
+
+            # combinedMask = cv2.bitwise_or(pmask, gmask)
+
+            # Optional cleanup on the combined binary mask
+            combinedMask = np.zeros_like(original_frame)
+            combinedMask[pmask > 0] = p_color_mask
+            combinedMask[gmask > 0] = g_color_mask
+            cv2.imshow("Combined Mask", combinedMask)
 
             # check if esc key pressed
             key = cv2.waitKey(20)
@@ -92,6 +145,9 @@ class Tracker:
         if color == 'o':
             # Orange Tracking
             mask = cv2.inRange(hsv, orangeLowMask, orangeHighMask)
+        if color == 'y':
+            # Yellow Tracking
+            mask = cv2.inRange(hsv, yellowLowMask, yellowHighMask)
         if color == 'b':
             # Blue Tracking
             mask = cv2.inRange(hsv, blueLowMask, blueHighMask)
@@ -106,8 +162,9 @@ class Tracker:
         # masked_blurred = cv2.bitwise_and(frame,frame, mask= mask)
         # Convert the masked image to gray scale (Required by HoughCircles routine)
         result = cv2.cvtColor(masked_blurred, cv2.COLOR_BGR2GRAY)
+
         # Detect circles in the image using Canny edge and Hough transform
-        circles = cv2.HoughCircles(result, cv2.HOUGH_GRADIENT, 1.5, 300, param1=100, param2=20, minRadius=20, maxRadius=200)
+        circles = cv2.HoughCircles(result, cv2.HOUGH_GRADIENT, 1.5, 300, param1=100, param2=15, minRadius=20, maxRadius=45)
         return circles
             
     def DrawCircles(self, frame, circles, dotColor):
@@ -143,6 +200,6 @@ def setup_tracker():
     print("Tracker Setup")
 
     # Green is the end effector, blue is the goal
-    tracker = Tracker('g', 'b')
+    tracker = Tracker('g', 'y')
     print("Moving on")
     return tracker

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from Client import setup_client
+from client import setup_client
 import helpers.movements as mv
 from helpers.math_tools import estimate_jacobian, Broyden
 import math
@@ -51,8 +51,11 @@ def run_servoing(client):
     for iteration in range(MAX_ITERATIONS + 1):
         error = [target_pos[i] - end_effector_pos[i] for i in range(2)]
         distance = math.hypot(*error)
+        previous_angles = mv.get_joint_angles()
         print("Iteration:", iteration, "Target:", target_pos,
-              "End effector:", end_effector_pos, "Error (pixels):", distance)
+              "End effector:", end_effector_pos, "Error (pixels):", distance,
+              "Joint angles: ", previous_angles
+              )
         if distance <= ERROR:
             print("Target reached.")
             return True
@@ -76,13 +79,16 @@ def run_servoing(client):
 
         # Synchronize the movement helper with the actual encoder readings.
         mv.set_position()
-        previous_angles = mv.get_joint_angles()
-        mv.move_to_joint_angles(previous_angles[0] + delta_q[0],
-                                previous_angles[1] + delta_q[1])
+        mv.move_to_joint_angles(previous_angles[0] + (delta_q[0] * 180 / math.pi),
+                                previous_angles[1] + (delta_q[1] * 180 / math.pi),
+                                False
+        )
         time.sleep(0.1)
         end_effector_pos, target_pos = read_positions(client)
         current_angles = mv.get_joint_angles()
-        jacobian = update_jacobian(jacobian, previous_angles, current_angles,
+        previous_angles_rad = [a * math.pi / 180 for a in previous_angles]
+        current_angles_rad = [a * math.pi / 180 for a in current_angles]
+        jacobian = update_jacobian(jacobian, previous_angles_rad, current_angles_rad,
                                    previous_position, end_effector_pos)
 
 

@@ -4,7 +4,7 @@
 import socket
 import time
 from queue import Queue
-from camera_helpers.color_tracking import Tracker, setup_tracker
+from server.camera_helpers.color_tracking import Tracker, setup_tracker
 
 # This class handles the Server side of the comunication between the laptop and the brick.
 class Server:

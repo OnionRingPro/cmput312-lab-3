@@ -20,7 +20,7 @@ def calibrate_zero():
     l1_motor_zero = l1_motor.degrees - l1_motor_current
     l2_motor_zero = l2_motor.degrees - l1_motor_current - l2_motor_current*MOTOR2_RATIO
 
-def move_to_joint_angles(theta1, theta2):
+def move_to_joint_angles(theta1, theta2, blocking=True):
     global l1_motor_current, l2_motor_current
 
     motor1_target = (theta1 - l1_motor_current) * MOTOR1_RATIO
@@ -28,7 +28,8 @@ def move_to_joint_angles(theta1, theta2):
 
     l1_motor.on_for_degrees(SpeedDPS(60), motor1_target, brake=False, block=False)
     l2_motor.on_for_degrees(SpeedDPS(60), motor1_target + motor2_target, brake=False, block=True)
-    l1_motor.wait_while("running")
+    if blocking:
+        l1_motor.wait_while("running")
 
     l1_motor_current += motor1_target / MOTOR1_RATIO
     l2_motor_current += motor2_target / MOTOR2_RATIO
