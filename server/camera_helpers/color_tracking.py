@@ -164,7 +164,7 @@ class Tracker:
         result = cv2.cvtColor(masked_blurred, cv2.COLOR_BGR2GRAY)
 
         # Detect circles in the image using Canny edge and Hough transform
-        circles = cv2.HoughCircles(result, cv2.HOUGH_GRADIENT, 1.5, 300, param1=100, param2=15, minRadius=20, maxRadius=45)
+        circles = cv2.HoughCircles(result, cv2.HOUGH_GRADIENT, 1.5, 300, param1=100, param2=10, minRadius=20, maxRadius=45)
         return circles
             
     def DrawCircles(self, frame, circles, dotColor):

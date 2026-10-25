@@ -6,8 +6,8 @@ import math
 import time
 
 ERROR = 5.0  # pixels
-CONTROL_GAIN = 0.5 # controls how large a step to take in the direction of the target
-MAX_STEP = 3.0  # maximum joint change per iteration, in degrees
+CONTROL_GAIN = 0.05 # controls how large a step to take in the direction of the target
+MAX_STEP = 0.5 # maximum joint change per iteration, in radians
 MAX_ITERATIONS = 100
 
 
@@ -80,10 +80,8 @@ def run_servoing(client):
         # Synchronize the movement helper with the actual encoder readings.
         mv.set_position()
         mv.move_to_joint_angles(previous_angles[0] + (delta_q[0] * 180 / math.pi),
-                                previous_angles[1] + (delta_q[1] * 180 / math.pi),
-                                False
+                                previous_angles[1] + (delta_q[1] * 180 / math.pi)
         )
-        time.sleep(0.1)
         end_effector_pos, target_pos = read_positions(client)
         current_angles = mv.get_joint_angles()
         previous_angles_rad = [a * math.pi / 180 for a in previous_angles]
