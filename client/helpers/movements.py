@@ -84,4 +84,5 @@ def move_on_trajectory(trajectory):
     #     move_betwen_points(points[0], points[1])
     for x, y in trajectory:
         move_to_position(x,y)
+        set_position()
 
