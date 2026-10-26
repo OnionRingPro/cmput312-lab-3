@@ -22,7 +22,7 @@ def read_positions(client):
 
 
 def update_jacobian(J, previous_angles, current_angles,
-                    previous_position, current_position, step_size=0.01):
+                    previous_position, current_position, step_size=1):
     delta_q = [current_angles[i] - previous_angles[i] for i in range(2)]
     delta_y = [current_position[i] - previous_position[i] for i in range(2)]
 
