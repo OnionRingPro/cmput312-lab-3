@@ -6,7 +6,7 @@ from helpers.math_tools import estimate_jacobian
 def main():
     client = setup_client()
     calibrate_zero()
-    Jacobian = estimate_jacobian(client, 10, 10)
+    Jacobian = estimate_jacobian(client, 20, 20)
 
     print("\n\nJacobian:")
     print(Jacobian)
