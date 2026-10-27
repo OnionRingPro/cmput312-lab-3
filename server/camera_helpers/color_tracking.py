@@ -23,12 +23,12 @@ orangeLowMask = (5, 50, 50)
 orangeHighMask = (20, 255, 255)
 
 #If the ball is yellow
-yellowLowMask = (30, 44, 179)
-yellowHighMask = (35, 255, 255)
+yellowLowMask = (30, 83, 141)
+yellowHighMask = (38, 255, 255)
 
 #If the ball is green
-greenLowMask= (65, 62, 139)
-greenHighMask= (73, 255, 255)
+greenLowMask= (58, 67, 15)
+greenHighMask= (78, 255, 255)
 ########################################
 
 class Tracker:
