@@ -7,9 +7,9 @@ import time
 import argparse
 
 ERROR = 5.0  # pixels
-CONTROL_GAIN = 0.5 # controls how large a step to take in the direction of the target
-MAX_STEP = math.radians(3.0) # maximum joint change per iteration, in radians
-MAX_ITERATIONS = 300
+CONTROL_GAIN = 0.05 # controls how large a step to take in the direction of the target
+MAX_STEP = math.radians(45.0) # maximum joint change per iteration, in radians
+MAX_ITERATIONS = 100
 
 
 def read_positions(client):
@@ -27,8 +27,6 @@ def update_jacobian(J, previous_angles, current_angles,
     delta_y = [current_position[i] - previous_position[i] for i in range(2)]
 
     # Skip negligible joint motion to avoid dividing by almost zero.
-    # if delta_q[0]**2 + delta_q[1]**2 <= 1e-8:
-    #     return J
     if math.hypot(*delta_q) < math.radians(0.5):
         return J
 
@@ -51,6 +49,7 @@ def main():
     try:
         mv.calibrate_zero()
         read_positions(client)  # Wait until the camera can see both markers.
+        print("Position is received")
         run_servoing(client, continuous=args.track)
     finally:
         mv.l1_motor.off(brake=True)
@@ -59,7 +58,7 @@ def main():
 
 
 def run_servoing(client, continuous=False):
-    jacobian = estimate_jacobian(client, 10, 10)
+    jacobian = estimate_jacobian(client, 20, 20)
     end_effector_pos, target_pos = read_positions(client)
 
     iteration = 0
