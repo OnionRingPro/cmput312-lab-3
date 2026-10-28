@@ -17,8 +17,8 @@ def circle(t):
 
 def main():
 
-    points = [circle(t) for t in range(n)]
-    #points = [(15/100, 10/100), (10/100, 18/100), (-10/100, 15/100), (-15/100, 10/100)]
+    #points = [circle(t) for t in range(n)]
+    points = [(0.05, -0.15), (0.15, 0.10)]
     trajectory = arc_points(points)
     # check all points are valid
     for x, y in trajectory:

@@ -15,8 +15,8 @@ redLowMask = (0,50,50)
 redHighMask = (10, 255, 255)
 
 #If the ball is blue
-blueLowMask = (87, 62, 139)
-blueHighMask = (91, 255, 255)
+blueLowMask = (100, 44, 90)
+blueHighMask = (120, 255, 255)
 
 #If the ball is orange
 orangeLowMask = (5, 50, 50)
@@ -60,6 +60,10 @@ class Tracker:
             p_hul, p_sal, p_val = yellowLowMask
             p_huh, p_sah, p_vah = yellowHighMask
             p_color_mask = (0, 255, 255)
+        elif pointColor == 'b':
+            p_hul, p_sal, p_val = blueLowMask
+            p_huh, p_sah, p_vah = blueHighMask
+            p_color_mask = (255, 0, 0)
         
         if goalColor == 'g':
             g_hul, g_sal, g_val = greenLowMask
@@ -69,6 +73,10 @@ class Tracker:
             g_hul, g_sal, g_val = yellowLowMask
             g_huh, g_sah, g_vah = yellowHighMask
             g_color_mask = (0, 255, 255)
+        elif goalColor == 'b':
+            g_hul, g_sal, g_val = blueLowMask
+            g_huh, g_sah, g_vah = blueHighMask
+            g_color_mask = (255, 0, 0)
 
         while rval:
             # Handle current frame
@@ -202,6 +210,6 @@ def setup_tracker():
     print("Tracker Setup")
 
     # Green is the end effector, blue is the goal
-    tracker = Tracker('g', 'y')
+    tracker = Tracker('g', 'b')
     print("Moving on")
     return tracker

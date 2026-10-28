@@ -8,8 +8,8 @@ import argparse
 
 ERROR = 5.0  # pixels
 CONTROL_GAIN = 0.05 # controls how large a step to take in the direction of the target
-MAX_STEP = math.radians(45.0) # maximum joint change per iteration, in radians
-MAX_ITERATIONS = 100
+MAX_STEP = math.radians(5.0) # maximum joint change per iteration, in radians
+MAX_ITERATIONS = 300
 
 
 def read_positions(client):
